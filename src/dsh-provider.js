@@ -2,7 +2,7 @@
 
 const vscode = require('vscode');
 
-const CSP_BASE = "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'";
+const CSP_BASE = "default-src 'none'; connect-src http://127.0.0.1:* http://localhost:*; style-src 'unsafe-inline'; script-src 'unsafe-inline'";
 
 
 const STYLE = `
@@ -100,6 +100,9 @@ class DshProvider {
           this._logger.append('[webview] 内嵌导航未生效（3 秒后页面仍在原地），已切换为浏览器引导卡片。');
           this._render();
           break;
+        case 'probe':
+          this._logger.append(`[webview] ${msg.text}`);
+          break;
         case 'retryEmbed':
           this._navFailed = false;
           this._logger.append('[webview] 重试内嵌导航。');
@@ -123,12 +126,19 @@ class DshProvider {
 
   _html(state, url, error) {
     const running = state === 'running' && url;
-    let headExtra = '';
+
     let navScript = '';
     let body;
     if (running && !this._navFailed) {
-      headExtra = `\n  <meta http-equiv="refresh" content="0; url=${this._escape(url)}">`;
-      navScript = `\n    location.replace(${JSON.stringify(url)});\n    setTimeout(() => send('navProbe'), 3000);`;
+      const urlJs = JSON.stringify(url);
+      navScript = `
+    window.addEventListener('pagehide', () => probe('pagehide: 导航已开始，页面卸载'));
+    fetch(${urlJs}, { mode: 'no-cors' })
+      .then(() => probe('fetch-ok: dsh 服务可达'))
+      .catch(e => probe('fetch-fail: ' + e));
+    probe('navigating: location.replace');
+    location.replace(${urlJs});
+    setTimeout(() => send('navProbe'), 3000);`;
       body = this._centered('<div class="spinner"></div><p>正在打开 DSH Web UI…</p>');
     } else if (running && this._navFailed) {
       body = this._centered(
@@ -155,15 +165,16 @@ class DshProvider {
     return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">${headExtra}
+  <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="${CSP_BASE}">
   <style>${STYLE}</style>
 </head>
 <body>
   ${body}
   <script>
-    const api = acquireVsCodeApi();${navScript}
+    const api = acquireVsCodeApi();
     function send(cmd) { api.postMessage({ command: cmd }); }
+    function probe(text) { api.postMessage({ command: 'probe', text }); }${navScript}
   </script>
 </body>
 </html>`;
