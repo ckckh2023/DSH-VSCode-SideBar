@@ -142,7 +142,7 @@ class DshManager {
     if (!this.child || this.state === 'stopping' || this.state === 'stopped') return;
     this._stopRequested = true;
     this._setState('stopping');
-    this.logger.append('[dsh] 正在停止（模拟 Ctrl+C）…');
+    this.logger.append('[dsh] 正在停止…');
     const pid = this.child.pid;
     if (pid) {
       try {
