@@ -2,8 +2,6 @@
 
 在 VSCode 侧边栏中运行 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（dsh）的 Web UI。
 
-扩展通过 `dsh web --no-open` 启动 dsh 进程，从输出中解析带 token 的访问链接，并在侧边栏 WebView 中打开 Web UI。
-
 ## 前置要求
 
 - VSCode ≥ 1.85
@@ -27,7 +25,6 @@ npm install -g @deepseek-harness/cli
 npm install        # 安装依赖
 npm run build      # esbuild 构建 out/extension.js
 npm run watch      # 监听构建
-
 npm run package    # 打包 .vsix
 ```
 

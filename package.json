@@ -1,8 +1,8 @@
 {
   "name": "dsh-sidebar",
   "displayName": "DSH Web UI Sidebar",
-  "description": "Run `dsh web` and embed its Web UI into a VSCode sidebar webview via a local reverse proxy.",
-  "version": "0.2.1",
+  "description": "在 VSCode 侧边栏中运行 DSH 的 Web UI，兼顾日常开发使用。",
+  "version": "1.0.1",
   "publisher": "ckckh2023",
   "license": "MIT",
   "repository": {
@@ -32,7 +32,8 @@
         {
           "type": "webview",
           "id": "dsh.sidebar",
-          "name": "DSH Web UI"
+          "name": "DSH Web UI",
+          "icon": "media/icon.svg"
         }
       ]
     },

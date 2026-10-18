@@ -195,12 +195,12 @@ class DshManager {
     if (IS_WIN) {
       try {
         spawn('taskkill', ['/pid', String(pid), '/T', '/F'], { windowsHide: true });
-      } catch { /* already gone */ }
+      } catch {}
     }
     else {
       try {
         process.kill(-pid, 'SIGKILL');
-      } catch { /* already gone */ }
+      } catch {}
     }
   }
 
