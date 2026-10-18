@@ -124,12 +124,14 @@ class DshManager {
     this.proxy
       .start()
       .then(proxyPort => {
-        this.url = `http://127.0.0.1:${proxyPort}${target.pathname}${target.search}`;
-        if (this.state === 'starting') {
-          clearTimeout(this._startupTimer);
-          this._startupTimer = null;
-          this._setState('running');
+        if (this.state !== 'starting') {
+          this._closeProxy();
+          return;
         }
+        this.url = `http://127.0.0.1:${proxyPort}${target.pathname}${target.search}`;
+        clearTimeout(this._startupTimer);
+        this._startupTimer = null;
+        this._setState('running');
       })
       .catch(err => {
         this._fail(`启动本地反向代理失败: ${err.message}`);

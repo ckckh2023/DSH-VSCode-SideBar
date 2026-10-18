@@ -103,6 +103,20 @@ class DshProxy {
       clientSocket.on('close', cleanup);
     });
     upReq.on('error', () => clientSocket.destroy());
+    upReq.on('response', res => {
+      if (clientSocket.destroyed) return;
+      const lines = [`HTTP/1.1 ${res.statusCode} ${res.statusMessage || ''}`];
+      for (const [key, value] of Object.entries(res.headers)) {
+        if (Array.isArray(value)) {
+          for (const item of value) lines.push(`${key}: ${item}`);
+        } else {
+          lines.push(`${key}: ${value}`);
+        }
+      }
+      clientSocket.write(lines.join('\r\n') + '\r\n\r\n');
+      res.pipe(clientSocket);
+      res.on('error', () => clientSocket.destroy());
+    });
     clientSocket.on('error', () => upReq.destroy());
     upReq.end();
   }
