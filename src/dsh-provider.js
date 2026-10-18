@@ -3,8 +3,7 @@
 const vscode = require('vscode');
 
 const CSP_BASE = "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'";
-const CSP_WITH_FRAME =
-  "default-src 'none'; frame-src http://127.0.0.1:* http://localhost:*; style-src 'unsafe-inline'; script-src 'unsafe-inline'";
+
 
 const STYLE = `
   html, body { height: 100%; }
@@ -108,11 +107,13 @@ class DshProvider {
 
   _html(state, url, error) {
     const running = state === 'running' && url;
-    const csp = running ? CSP_WITH_FRAME : CSP_BASE;
+    let headExtra = '';
+    let navScript = '';
     let body;
     if (running) {
-      body = `<iframe src="${url}" allow="clipboard-read; clipboard-write; fullscreen"
-        style="border:0; position:absolute; inset:0; width:100%; height:100%;"></iframe>`;
+      headExtra = `\n  <meta http-equiv="refresh" content="0; url=${this._escape(url)}">`;
+      navScript = `\n    location.replace(${JSON.stringify(url)});`;
+      body = this._centered('<div class="spinner"></div><p>正在打开 DSH Web UI…</p>');
     } else if (state === 'starting' || state === 'stopping') {
       const text = state === 'starting' ? '正在启动 dsh web…' : '正在停止 dsh…';
       body = this._centered(
@@ -130,14 +131,14 @@ class DshProvider {
     return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="${csp}">
+  <meta charset="UTF-8">${headExtra}
+  <meta http-equiv="Content-Security-Policy" content="${CSP_BASE}">
   <style>${STYLE}</style>
 </head>
 <body>
   ${body}
   <script>
-    const api = acquireVsCodeApi();
+    const api = acquireVsCodeApi();${navScript}
     function send(cmd) { api.postMessage({ command: cmd }); }
   </script>
 </body>
