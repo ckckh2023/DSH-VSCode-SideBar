@@ -1,0 +1,9 @@
+.vscode/**
+.codeartsdoer/**
+src/**
+scripts/**
+assets/**
+node_modules/**
+esbuild.js
+**/*.map
+**/*.tsbuildinfo
