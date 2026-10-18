@@ -27,7 +27,7 @@ npm install -g @deepseek-harness/cli
 npm install        # 安装依赖
 npm run build      # esbuild 构建 out/extension.js
 npm run watch      # 监听构建
-npm run smoke      # 冒烟测试：真实启动 dsh web → 解析 URL → 停止
+npm run test       # 单元测试
 npm run package    # 打包 .vsix
 ```
 
