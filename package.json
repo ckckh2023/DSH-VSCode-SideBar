@@ -2,17 +2,19 @@
   "name": "dsh-sidebar",
   "displayName": "DSH Web UI Sidebar",
   "description": "Run `dsh web` and embed its Web UI into a VSCode sidebar webview.",
-  "version": "0.1.1",
-  "publisher": "ckckh2023 <ckckh2023@outlook.com>",
+  "version": "0.1.2",
+  "publisher": "ckckh2023",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ckckh2023/DSH-VSCode-SideBar"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
+  "icon": "media/icon.png",
   "categories": [
     "Other"
-  ],
-  "activationEvents": [
-    "onView:dsh.sidebar"
   ],
   "main": "out/extension.js",
   "contributes": {
@@ -28,6 +30,7 @@
     "views": {
       "dsh": [
         {
+          "icon": "media/icon.png",
           "type": "webview",
           "id": "dsh.sidebar",
           "name": "DSH Web UI"

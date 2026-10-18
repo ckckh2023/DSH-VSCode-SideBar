@@ -11,6 +11,7 @@ function activate(context) {
   const config = () => vscode.workspace.getConfiguration('dsh');
 
   const provider = new DshProvider(manager, {
+    logger,
     onFirstResolve() {
       if (config().get('autoStart', false) && manager.state === 'stopped') {
         vscode.commands.executeCommand('dsh.start');

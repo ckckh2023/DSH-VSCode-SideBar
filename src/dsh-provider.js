@@ -68,12 +68,17 @@ const ICON_SVG = `
 </svg>`;
 
 class DshProvider {
-  constructor(manager, { onFirstResolve } = {}) {
+  constructor(manager, { logger, onFirstResolve } = {}) {
     this._manager = manager;
+    this._logger = logger || { append() {} };
     this._onFirstResolve = onFirstResolve || null;
     this._view = null;
     this._resolvedOnce = false;
-    manager.onDidChange(() => this._render());
+    this._navFailed = false;
+    manager.onDidChange(s => {
+      if (s.state === 'starting') this._navFailed = false;
+      this._render();
+    });
   }
 
   resolveWebviewView(view) {
@@ -90,6 +95,16 @@ class DshProvider {
         case 'openBrowser':
           vscode.commands.executeCommand('dsh.openInBrowser');
           break;
+        case 'navProbe':
+          this._navFailed = true;
+          this._logger.append('[webview] 内嵌导航未生效（3 秒后页面仍在原地），已切换为浏览器引导卡片。');
+          this._render();
+          break;
+        case 'retryEmbed':
+          this._navFailed = false;
+          this._logger.append('[webview] 重试内嵌导航。');
+          this._render();
+          break;
       }
     });
     this._render();
@@ -102,6 +117,7 @@ class DshProvider {
   _render() {
     if (!this._view) return;
     const { state, url, error } = this._manager;
+    this._logger.append(`[webview] render state=${state}${this._navFailed ? ' navFailed' : ''}`);
     this._view.webview.html = this._html(state, url, error);
   }
 
@@ -110,10 +126,18 @@ class DshProvider {
     let headExtra = '';
     let navScript = '';
     let body;
-    if (running) {
+    if (running && !this._navFailed) {
       headExtra = `\n  <meta http-equiv="refresh" content="0; url=${this._escape(url)}">`;
-      navScript = `\n    location.replace(${JSON.stringify(url)});`;
+      navScript = `\n    location.replace(${JSON.stringify(url)});\n    setTimeout(() => send('navProbe'), 3000);`;
       body = this._centered('<div class="spinner"></div><p>正在打开 DSH Web UI…</p>');
+    } else if (running && this._navFailed) {
+      body = this._centered(
+        `${ICON_SVG}<h2>DSH 正在运行</h2>
+         <p>WebView 未能内嵌 Web UI（跨站导航被拦截）</p>
+         <button onclick="send('openBrowser')">🌐 在浏览器中打开</button>
+         <button onclick="send('retryEmbed')">↻ 重试内嵌</button>
+         <button onclick="send('stop')">■ 停止 DSH</button>`
+      );
     } else if (state === 'starting' || state === 'stopping') {
       const text = state === 'starting' ? '正在启动 dsh web…' : '正在停止 dsh…';
       body = this._centered(
