@@ -2,6 +2,9 @@
 
 在 VSCode 侧边栏中运行 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)（dsh）的 Web UI。
 
+> [!CAUTION]
+> 此插件目前仍使用 Web UI 而非自制 VSCode 原生 UI！如有想法可以提交 [Issue](https://github.com/ckckh2023/DSH-VSCode-SideBar/issues)。
+
 ## 前置要求
 
 - VSCode ≥ 1.85
