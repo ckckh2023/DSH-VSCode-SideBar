@@ -19,13 +19,10 @@ function activate(context) {
     },
   });
 
-  manager.onDidChange(s => {
-    vscode.commands.executeCommand(
-      'setContext',
-      'dsh.running',
-      s.state === 'running' || s.state === 'stopping'
-    );
-  });
+  const setStateContext = state =>
+    vscode.commands.executeCommand('setContext', 'dsh.state', state);
+  manager.onDidChange(s => setStateContext(s.state));
+  setStateContext(manager.state);
 
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider('dsh.sidebar', provider),

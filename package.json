@@ -2,7 +2,7 @@
   "name": "dsh-sidebar",
   "displayName": "DSH Web UI Sidebar",
   "description": "在 VSCode 侧边栏中运行 DSH 的 Web UI，兼顾日常开发使用。",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "publisher": "ckckh2023",
   "license": "MIT",
   "repository": {
@@ -58,17 +58,17 @@
       "view/title": [
         {
           "command": "dsh.start",
-          "when": "view == dsh.sidebar && !dsh.running",
+          "when": "view == dsh.sidebar && dsh.state == 'stopped'",
           "group": "navigation@1"
         },
         {
           "command": "dsh.stop",
-          "when": "view == dsh.sidebar && dsh.running",
+          "when": "view == dsh.sidebar && dsh.state != 'stopped'",
           "group": "navigation@1"
         },
         {
           "command": "dsh.openInBrowser",
-          "when": "view == dsh.sidebar && dsh.running",
+          "when": "view == dsh.sidebar && dsh.state == 'running'",
           "group": "navigation@2"
         }
       ]
