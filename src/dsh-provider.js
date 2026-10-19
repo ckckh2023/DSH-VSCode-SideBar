@@ -80,19 +80,7 @@ class DshProvider {
     this._view = view;
     view.webview.options = { enableScripts: true };
     view.onDidDispose(() => { this._view = null; });
-    view.webview.onDidReceiveMessage(msg => {
-      switch (msg && msg.command) {
-        case 'start':
-          vscode.commands.executeCommand('dsh.start');
-          break;
-        case 'stop':
-          vscode.commands.executeCommand('dsh.stop');
-          break;
-        case 'openBrowser':
-          vscode.commands.executeCommand('dsh.openInBrowser');
-          break;
-      }
-    });
+    view.webview.onDidReceiveMessage(handleMessage);
     this._render();
     if (!this._resolvedOnce) {
       this._resolvedOnce = true;
@@ -146,6 +134,10 @@ class DshProvider {
 </html>`;
   }
 
+  buildHtml(state, url, error) {
+    return this._html(state, url, error);
+  }
+
   _centered(inner, extra) {
     return `<div class="center">${inner}${extra || ''}</div>`;
   }
@@ -157,4 +149,18 @@ class DshProvider {
   }
 }
 
-module.exports = { DshProvider };
+function handleMessage(msg) {
+  switch (msg && msg.command) {
+    case 'start':
+      vscode.commands.executeCommand('dsh.start');
+      break;
+    case 'stop':
+      vscode.commands.executeCommand('dsh.stop');
+      break;
+    case 'openBrowser':
+      vscode.commands.executeCommand('dsh.openInBrowser');
+      break;
+  }
+}
+
+module.exports = { DshProvider, handleMessage };

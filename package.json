@@ -52,6 +52,11 @@
         "command": "dsh.openInBrowser",
         "title": "DSH: 在浏览器中打开",
         "icon": "$(globe)"
+      },
+      {
+        "command": "dsh.openInEditor",
+        "title": "DSH: 在编辑器面板中打开",
+        "icon": "$(link-external)"
       }
     ],
     "menus": {
@@ -70,6 +75,11 @@
           "command": "dsh.openInBrowser",
           "when": "view == dsh.sidebar && dsh.state == 'running'",
           "group": "navigation@2"
+        },
+        {
+          "command": "dsh.openInEditor",
+          "when": "view == dsh.sidebar && dsh.state == 'running'",
+          "group": "navigation@3"
         }
       ]
     },

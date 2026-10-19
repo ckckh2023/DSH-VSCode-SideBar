@@ -3,6 +3,7 @@
 const vscode = require('vscode');
 const { DshManager } = require('./dsh-manager');
 const { DshProvider } = require('./dsh-provider');
+const { DshPanel } = require('./dsh-panel');
 
 function activate(context) {
   const logger = vscode.window.createOutputChannel('DSH');
@@ -24,6 +25,8 @@ function activate(context) {
   manager.onDidChange(s => setStateContext(s.state));
   setStateContext(manager.state);
 
+  const panel = new DshPanel(manager, provider, { logger });
+
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider('dsh.sidebar', provider),
     vscode.commands.registerCommand('dsh.start', () => {
@@ -38,8 +41,10 @@ function activate(context) {
       if (!manager.dshUrl) return;
       await vscode.env.openExternal(vscode.Uri.parse(manager.dshUrl));
     }),
+    vscode.commands.registerCommand('dsh.openInEditor', () => panel.open()),
     logger,
-    manager
+    manager,
+    panel
   );
 }
 
