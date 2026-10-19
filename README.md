@@ -5,6 +5,9 @@
 > [!CAUTION]
 > 此插件目前仍使用 Web UI 而非自制 VSCode 原生 UI！如有想法可以提交 [Issue](https://github.com/ckckh2023/DSH-VSCode-SideBar/issues)。
 
+> [!TIP]
+> 由于已经有开发者制作了原生 VSCode UI 的 DSH 侧边栏插件，为了不重复造轮子，故停止开发，可以前往 [dsh-sidebar](https://github.com/Lixxx1/dsh-vscode) 查看。
+
 ## 前置要求
 
 - VSCode ≥ 1.85
