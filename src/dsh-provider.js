@@ -79,6 +79,7 @@ class DshProvider {
   resolveWebviewView(view) {
     this._view = view;
     view.webview.options = { enableScripts: true };
+    view.onDidDispose(() => { this._view = null; });
     view.webview.onDidReceiveMessage(msg => {
       switch (msg && msg.command) {
         case 'start':
