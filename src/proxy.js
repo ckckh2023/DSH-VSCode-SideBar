@@ -25,15 +25,28 @@ class DshProxy {
       socket.on('close', () => this._sockets.delete(socket));
     });
     this._server.on('upgrade', (req, socket, head) => this._forwardUpgrade(req, socket, head));
+    this._closed = false;
     this.port = null;
   }
 
   start() {
     return new Promise((resolve, reject) => {
-      const onError = err => reject(err);
+      if (this._closed) {
+        reject(new Error('proxy already stopped'));
+        return;
+      }
+      const onError = err => {
+        this._closed = true;
+        reject(err);
+      };
       this._server.once('error', onError);
       this._server.listen(0, '127.0.0.1', () => {
         this._server.removeListener('error', onError);
+        if (this._closed) {
+          this._server.close();
+          reject(new Error('proxy stopped during startup'));
+          return;
+        }
         this.port = this._server.address().port;
         this._logger.append(`[proxy] listening on 127.0.0.1:${this.port} -> ${this._targetHost}:${this._targetPort}`);
         resolve(this.port);
@@ -42,12 +55,14 @@ class DshProxy {
   }
 
   stop() {
-    if (this.port === null) return;
-    this._logger.append(`[proxy] closing 127.0.0.1:${this.port}`);
+    if (this._closed) return;
+    this._closed = true;
+    const port = this.port;
     this.port = null;
     for (const socket of this._sockets) socket.destroy();
     this._sockets.clear();
-    this._server.close();
+    if (this._server.listening) this._server.close();
+    this._logger.append(port ? `[proxy] closing 127.0.0.1:${port}` : '[proxy] closing (not yet listening)');
   }
 
   _forward(clientReq, clientRes) {
