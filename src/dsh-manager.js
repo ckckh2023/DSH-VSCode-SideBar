@@ -119,8 +119,9 @@ class DshManager {
       this._fail(`无法解析 dsh 输出的链接: ${this._sanitize(dshUrl)}`);
       return;
     }
-    const targetPort = target.port ? Number(target.port) : 80;
-    this.proxy = new DshProxy({ targetHost: target.hostname, targetPort, logger: this.logger });
+    const useTls = target.protocol === 'https:';
+    const targetPort = target.port ? Number(target.port) : (useTls ? 443 : 80);
+    this.proxy = new DshProxy({ targetHost: target.hostname, targetPort, useTls, logger: this.logger });
     this.proxy
       .start()
       .then(proxyPort => {
@@ -173,6 +174,7 @@ class DshManager {
     this._startupTimer = null;
     this._killTimer = null;
     this.child = null;
+    this.dshUrl = null;
     if (!this._stopRequested) {
       this.error = `dsh 进程已退出（${code === null ? '被信号终止' : '退出码 ' + code}），详情见 DSH 输出频道。`;
       this.logger.append('[dsh] ' + this.error);
@@ -212,6 +214,7 @@ class DshManager {
     this._startupTimer = null;
     this._killTimer = null;
     this.child = null;
+    this.dshUrl = null;
     this._closeProxy();
     this._setState('stopped');
   }

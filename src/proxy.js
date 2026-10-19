@@ -1,6 +1,7 @@
 'use strict';
 
 const http = require('http');
+const https = require('https');
 
 function rewriteSetCookie(cookie) {
   let c = cookie;
@@ -11,9 +12,11 @@ function rewriteSetCookie(cookie) {
 }
 
 class DshProxy {
-  constructor({ targetHost = '127.0.0.1', targetPort, logger } = {}) {
+  constructor({ targetHost = '127.0.0.1', targetPort, useTls = false, logger } = {}) {
     this._targetHost = targetHost;
     this._targetPort = targetPort;
+    this._transport = useTls ? https : http;
+    this._extraOpts = useTls ? { rejectUnauthorized: false } : {};
     this._logger = logger || { append() {} };
     this._server = http.createServer((req, res) => this._forward(req, res));
     this._sockets = new Set();
@@ -48,13 +51,14 @@ class DshProxy {
   }
 
   _forward(clientReq, clientRes) {
-    const upReq = http.request(
+    const upReq = this._transport.request(
       {
         host: this._targetHost,
         port: this._targetPort,
         method: clientReq.method,
         path: clientReq.url,
         headers: { ...clientReq.headers },
+        ...this._extraOpts,
       },
       upRes => {
         const headers = { ...upRes.headers };
@@ -75,12 +79,13 @@ class DshProxy {
   }
 
   _forwardUpgrade(clientReq, clientSocket, head) {
-    const upReq = http.request({
+    const upReq = this._transport.request({
       host: this._targetHost,
       port: this._targetPort,
       method: clientReq.method,
       path: clientReq.url,
       headers: { ...clientReq.headers },
+      ...this._extraOpts,
     });
     upReq.on('upgrade', (upRes, upSocket, upHead) => {
       const lines = ['HTTP/1.1 101 Switching Protocols'];
